@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lost & Found ABES Campus</title>
+    <style>
+
+        /* ===== Background Image (Blurred) ===== */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('download.jpg') center/cover no-repeat;
+            filter: blur(6px) brightness(70%);
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        /* ===== Center Layout ===== */
+        .main-container {
+            width: 100%;
+            padding-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ===== Attractive Two-Color Title ===== */
+        .title {
+            font-size: 45px;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .title span:first-child {
+            color: #ff5722;  /* Orange */
+        }
+        .title span:last-child {
+            color: #2196f3;  /* Blue */
+        }
+
+        /* ===== Input Card ===== */
+        .card {
+            width: 80%;
+            max-width: 720px;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 25px;
+            border-radius: 14px;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.25);
+        }
+
+        input, select, textarea {
+            width: 90%;
+            padding: 12px;
+            margin: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button {
+            padding: 12px 18px;
+            background: #2196f3;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0d6ac7;
+        }
+
+        /* ===== Items Display ===== */
+        .item {
+            background: rgba(255,255,255,0.92);
+            width: 85%;
+            max-width: 670px;
+            padding: 15px;
+            margin: 12px auto;
+            border-radius: 10px;
+            border-left: 6px solid #2196f3;
+            backdrop-filter: blur(3px);
+        }
+
+        .item img {
+            width: 140px;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        /* Search Bar */
+        #searchBox {
+            width: 70%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <!-- Two Color Stylish Title -->
+    <h1 class="title">
+        <span>Lost</span> <span>& Found</span><br>
+        <small style="font-size:22px; color:white; text-shadow:1px 1px 3px black;">
+            ABES Campus
+        </small>
+    </h1>
+
+    <!-- Search Bar -->
+    <input type="text" id="searchBox" placeholder="Search items here...">
+
+    <!-- Card -->
+    <div class="card">
+        <h2>Add New Lost / Found Item</h2>
+
+        <select id="type">
+            <option value="Lost">Lost Item</option>
+            <option value="Found">Found Item</option>
+        </select>
+
+        <input type="text" id="title" placeholder="Item title">
+        <textarea id="desc" placeholder="Describe the item…"></textarea>
+        <input type="text" id="location" placeholder="Where was it lost/found?">
+        <input type="file" id="photo">
+
+        <select id="status">
+            <option>Pending</option>
+            <option>In Progress</option>
+            <option>Resolved</option>
+        </select>
+
+        <button onclick="addItem()">Add Item</button>
+    </div>
+
+    <h2 style="color:white; margin-top:30px; text-shadow:1px 1px 4px black;">ABES Campus Records</h2>
+
+    <button onclick="downloadPDF()">Download All Records</button>
+
+    <div id="items"></div>
+
+</div>
+
+<script>
+    // Add new item
+    function addItem() {
+        let type = document.getElementById("type").value;
+        let title = document.getElementById("title").value;
+        let desc = document.getElementById("desc").value;
+        let location = document.getElementById("location").value;
+        let status = document.getElementById("status").value;
+        let photo = document.getElementById("photo").files[0];
+
+        if (!title || !desc || !location) {
+            alert("Please fill all details");
+            return;
+        }
+
+        let imgURL = "";
+        if (photo) imgURL = URL.createObjectURL(photo);
+
+        let box = document.createElement("div");
+        box.className = "item";
+
+        box.innerHTML = `
+            <h3>${type}: ${title}</h3>
+            <p><b>Description:</b> ${desc}</p>
+            <p><b>Location:</b> ${location}</p>
+            <p><b>Status:</b> <span style="color:green;">${status}</span></p>
+            ${imgURL ? `<img src="${imgURL}">` : ""}
+            <br><br>
+            <button onclick="trackStatus(this)">Track Progress</button>
+            <button onclick="reComplaint(this)" style="background:#ff5722;">Re-Complaint</button>
+        `;
+
+        document.getElementById("items").prepend(box);
+    }
+
+    // Track progress
+    function trackStatus(btn) {
+        alert("Your request status is being processed…");
+    }
+
+    // Re-complaint
+    function reComplaint(btn) {
+        alert("Your re-complaint has been registered successfully!");
+    }
+
+    // Search filter
+    document.getElementById("searchBox").addEventListener("input", function () {
+        let q = this.value.toLowerCase();
+        let items = document.querySelectorAll(".item");
+
+        items.forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(q) ? "block" : "none";
+        });
+    });
+
+    // Download PDF (Text version)
+    function downloadPDF() {
+        let content = document.getElementById("items").innerText;
+        let a = document.createElement("a");
+        let file = new Blob([content], { type: 'text/plain' });
+
+        a.href = URL.createObjectURL(file);
+        a.download = "ABES_Lost_Found_Records.txt";
+        a.click();
+    }
+</script>
+
+</body>
+</html>
+
+
+
